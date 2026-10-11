@@ -1,0 +1,312 @@
+# Project Status
+
+**Last Updated:** 2026-10-11 12:26 IST
+
+## 📍 Current Phase
+
+Phase 4: Role-Specific Workspaces and Team Administration
+
+Identity, RBAC, audit logging, the serialized workflow, the first three frontend redesign phases, and focused module routes are implemented. The current work is adding role-specific administration and operational workspace details.
+
+## ✅ Work Completed (Recent)
+
+- Added a dedicated real proxy-timeout integration check in `apps/web/tests/proxy-timeout.spec.ts` with `playwright.proxy-timeout.config.ts`; it starts an isolated delayed FastAPI upstream and verifies the Next.js proxy returns the expected 504 response.
+- Isolated the proxy test’s Next.js artifacts through `GOAG_NEXT_DIST_DIR=.next-proxy-timeout` so temporary verification cannot corrupt the primary `.next-dev` development server.
+- Verified the proxy timeout end-to-end: 1 Playwright test passed with an 11-second upstream delay; API tests (18 passed), Ruff, the frontend production build, and TypeScript checks also passed.
+- Browser-reviewed the seeded Store Manager and Production Manager workspaces. Store Manager is inventory/request-first; Production Manager is production/task/traceability-first, with role-specific overview KPIs and quick actions visible.
+- Added operational status summaries and URL-backed filters to the Inventory and Production workspaces: request views use `request_status`, task views use `task_status`, and existing workflow actions remain available inside the filtered tables.
+- Added compact Inventory cards for in-stock units, requests needing action, missing serials, and damaged units; added Production cards for active drones, open tasks, pending approvals, and confirmed drones.
+- Verified the workspace refinement with a successful Next.js production build and `pnpm typecheck`.
+- Analyzed `Drone_Manufacturing_PRD_v0.1.pdf` and `drone.pdf`.
+- Confirmed the approved V1 business decisions and superseded conflicting proposals.
+- Selected the initial stack: Next.js, React, TypeScript, FastAPI, Supabase Auth, Supabase PostgreSQL, Python worker, Docker Compose, Pytest, and Playwright.
+- Defined the approved GOAG V1 scope, including inventory, serialized components, production, attendance, suppliers, sales records, quotations, orders, and delivery records.
+- Excluded invoices, payments, pricing, tax, barcode/QR scanning, after-sales operations, and automatic paper-data import from V1.
+- Created the module-wise implementation blueprint: `GOAG_V1_Implementation_Blueprint.md`.
+- Defined the initial build sequence: foundation, inventory, production, attendance, suppliers/sales, dashboards, and pilot readiness.
+- Created the repository scaffold for the Next.js web app, FastAPI API, Python worker, tests, and Docker Compose.
+- Added Supabase SSR authentication entry points with secure cookie handling and a FastAPI JWT verification boundary.
+- Added the initial Alembic migration for companies, users, memberships, roles, permissions, registered devices, and audit events.
+- Added seed data for the approved GOAG roles and permissions.
+- Implemented `/api/v1/me` and Managing Director user creation/listing endpoints with RBAC checks.
+- Implemented audit-event recording for user creation.
+- Implemented one-registered-device registration, conflict protection, administrator reset, and device audit events.
+- Added Next.js Supabase login and logout routes with secure SSR cookie plumbing.
+- Created the root `.env` development configuration file with placeholders for Supabase, database, frontend, API, device, and attendance settings.
+- Updated API settings to load the root `.env` when commands run from `apps/api`.
+- Updated Next.js configuration to load the same root `.env`, so Supabase values only need to be entered once.
+- Updated Alembic to load the root `.env` when migrations run from `apps/api`.
+- Applied Alembic migration `0001_initial` successfully to the configured Supabase PostgreSQL database.
+- Seeded the GOAG company, 6 approved roles, and 20 permissions in Supabase.
+- Verified the database is at migration head and confirmed 1 company, 6 roles, and 20 permissions.
+- Updated Alembic connection handling to support URL-encoded database passwords such as `%40`.
+- Re-ran API linting and tests successfully: 4 tests passed.
+- Linked the Supabase Auth user `ehteshamazam01@gmail.com` to the GOAG Managing Director membership.
+- Recorded the initial development-account provisioning audit event.
+- Verified the live FastAPI `/api/v1/me` response against Supabase: HTTP 200 with `MANAGING_DIRECTOR` role and active membership.
+- Added API foundation tests: health, current user, RBAC permission resolution, user creation, audit logging, and one-device enforcement/reset.
+- Verified API linting, 4 passing foundation tests, generated PostgreSQL migration SQL, and a passing Next.js production build.
+- Replaced the OTP-only login screen with email/password authentication using Supabase Auth.
+- Added a Google OAuth sign-in button and secure PKCE callback route at `apps/web/app/auth/callback/route.ts`.
+- Added safe post-login redirect handling to prevent external redirect targets.
+- Updated the home page to verify the Supabase session visibly by showing the authenticated email and sign-out link.
+- Added the authenticated `/dashboard` shell with server-side Supabase session verification.
+- Added a typed server-side API client and connected the dashboard to FastAPI `/api/v1/me` using the Supabase access token.
+- Updated password and Google OAuth success redirects to open `/dashboard`.
+- Isolated Next.js development artifacts in `.next-dev` so production builds do not corrupt a running development server.
+- Updated FastAPI Supabase token verification to support JWKS-signed ES256/RS256/EdDSA tokens, retain legacy HS256 verification, and fall back to Supabase Auth verification when required.
+- Verified the authenticated browser path end-to-end: the dashboard displays `ehteshamazam01@gmail.com`, active membership, `MANAGING_DIRECTOR`, and 20 permissions from FastAPI `/api/v1/me`.
+- Initialized shadcn/ui with Tailwind v4, Radix primitives, CSS variables, and Lucide icons in `apps/web`.
+- Added generated shadcn/ui components: Button, Card, Badge, Table, Dialog, Input, Label, and Separator.
+- Applied the shadcn/ui components to the authenticated dashboard shell.
+- Replaced the network-dependent Google font import with a local system font so frontend builds work without external font access.
+- Verified the styled shadcn/ui dashboard in the browser with the authenticated Managing Director session.
+- Added inventory and production models for component catalog, serialized inventory units, drones, component requests, issues, issue lines, and installation history.
+- Created and applied Alembic migration `0002_inventory_production` to the Supabase development database.
+- Added component catalog, drone creation/listing, and component request endpoints with RBAC and audit logging.
+- Seeded `inventory.catalog.manage` for Managing Director and Store Manager roles.
+- Added the first workflow API test: create component, create drone, create component request, and verify pending quantity tracking. API suite now passes 5 tests.
+- Added serialized inventory-unit receiving and serial assignment with duplicate protection and audit logging.
+- Added partial component issue handling with pending/backordered quantities and physical inventory-unit tracking.
+- Added component request rejection, post-completion cancellation, substitution approval by Store Manager permission, and audit history.
+- Added component installation lifecycle actions: install, remove, replace, return, and damage, including production/store permissions and approval records.
+- Added drone confirmation validation for required components, quantities, serials, production tasks, unresolved issues, drone serial, and quality checklist completion.
+- Added migration `0003_drone_checklist` for persisted drone confirmation checklists and applied it to the Supabase development database.
+- Added the end-to-end partial issue → serial assignment → installation → drone confirmation test. API linting passes and the full suite now passes 6 tests.
+- Added authenticated Next.js proxy routing for workflow API calls so Supabase access tokens remain server-side.
+- Added inventory-unit and component-request read endpoints for workflow selectors and live status tables.
+- Added the shadcn/ui Module 2 workflow panel with component catalog, drone creation, component requests, partial issue/substitution, serial assignment, component actions, and drone confirmation checklist screens.
+- Added live workflow status tables, permission-aware controls, success/error feedback, and refresh behavior.
+- Updated local API routing to prefer `127.0.0.1:8000` so an unrelated Docker service bound to `localhost:8000` cannot intercept GOAG requests.
+- Verified the authenticated workflow dashboard in the browser. Frontend production build passes and the API suite passes 6 tests.
+- Updated the workflow to treat the component catalog as preloaded/read-only in the dashboard; catalog creation is no longer presented as part of the Store Manager handover flow.
+- Added direct serial-number entry to component issuing. Store Managers can enter one serial per physical unit at handover; blank serials remain pending for later assignment.
+- Added validation for serial count, duplicate serials, unavailable existing serials, and audit capture of issued serial numbers.
+- Updated the workflow test and verified the live dashboard shows the serial-at-handover field. API tests remain at 6 passing and the frontend production build passes.
+- Added migration `0004_catalog_bom` for MVP catalog metadata and the drone-model relationship. The migration safely upgraded the existing MVP `drone_models` table in Supabase without deleting its records.
+- Imported all 20 MVP components into `component_catalog` with stable component codes, minimum stock, category, storage location, and remarks.
+- Seeded the MVP `10X` drone model and added drone-model selection to drone creation.
+- Added the opening-inventory spreadsheet interface with search, component selection, serial number, condition, location, and blur-triggered autosave. Saved rows become read-only and incomplete rows remain local drafts.
+- Verified live Supabase counts after the follow-up seed: 20 catalog components and 1 drone model.
+- Hardened direct serial handover to scope existing serial lookups to the current company and preserved the pre-existing MVP model table during migration downgrade.
+- Replaced the compact available-components list with a full shadcn/ui catalog table in `apps/web/components/component-catalog-table.tsx`.
+- Added catalog search, stable code display, category badges, serialized quantity counts, and component remarks.
+- Verified the refreshed dashboard in the browser: all 20 imported components render in the new table and the Next.js production build passes.
+- Removed the storage-location and tracking fields completely from the visible component catalog table and its search placeholder. The underlying inventory data model remains unchanged for future operational use.
+- Rebuilt the frontend successfully after the catalog table adjustment.
+- Removed the MVP-only minimum-stock column from the visible catalog table and renamed “On hand” to “Quantity.” The table now focuses on code, component, category, remarks, and current quantity.
+- Rebuilt the frontend successfully after the catalog simplification.
+- Added “Model not listed — add new model” to drone creation. Authorized production users can enter a model name and optional code; the API creates and audits the model before creating the drone.
+- Added “Component not listed — add to catalog” to component requests. Authorized catalog managers can enter a component name, optional code, and category; the component is saved as serialized and immediately used in the request.
+- Added duplicate-code protection, audit logging, and automatic code suggestions for new models/components.
+- Verified the fallback options in the live dashboard. Ruff, all 6 API tests, frontend build, and diff checks pass.
+- Removed the unapproved BOM feature completely from the application: deleted BOM API models, schemas, routes, seed logic, and added migration `0005_remove_bom_feature`.
+- Applied migration `0005_remove_bom_feature` to the Supabase development database, removing the BOM tables. The 10X drone model and 20-component catalog remain available.
+- Verified no BOM references remain in the active API, worker, or frontend code. Ruff, all 6 API tests, frontend build, and diff checks pass.
+- Added the Store Manager request-review table to the dashboard with drone, status, issued/pending quantities, creation date, and action controls.
+- Added “Prepare issue” to load a pending request into the issue form, rejection with a required reason, and post-completion cancellation of remaining quantities with audit logging.
+- Added a shadcn/ui reason dialog for request rejection and cancellation, and hid request review from roles without `request.read_all`.
+- Verified the live dashboard shows the request-review section. Ruff, all 6 API tests, frontend build, and diff checks pass.
+- Added migration `0006_production_tasks` and the production task model with assignment, status, notes, completion timestamps, and audit events.
+- Added APIs for production assignees, task creation/status updates, component installation history, and confirmed-drone reopening.
+- Added dashboard sections for installation history with pending approval actions, production task assignment/status tracking, and a reason-required reopen dialog.
+- Locked component changes on confirmed drones until an authorized manager reopens them.
+- Added automated coverage for task creation/completion, installation history, and drone reopening. Ruff, all 6 API tests, frontend build, and diff checks pass.
+- Added migration `0007_attendance` for geofenced attendance records, check-in/check-out coordinates, late status, device hash, and manager correction metadata.
+- Added configurable attendance settings for the test worksite coordinates, geofence radius, GPS accuracy limit, shift start/end, and late grace period.
+- Added protected attendance APIs for check-in, check-out, personal history, company history, and manager corrections with audit events.
+- Enforced the approved one-device rule, GPS-required policy, GPS-accuracy rejection, and GOAG geofence validation for attendance actions.
+- Added the shadcn/ui Attendance panel to the dashboard with device registration, check-in/check-out controls, status feedback, and attendance history.
+- Applied migration `0007_attendance` to the development Supabase database and re-ran the idempotent seed so existing roles receive the attendance permissions.
+- Added automated geofenced attendance coverage for device registration, check-in, duplicate check-in rejection, check-out, history, and audit events. Ruff, all 7 API tests, and the frontend production build pass.
+- Configured the attendance test geofence in the root `.env` with latitude `17.399825` and longitude `78.398521`.
+- Added migration `0008_attendance_exceptions` for date-specific, manager-approved off-site attendance exceptions.
+- Added attendance APIs for manager member lookup, exception approval/listing, and automatic exception validation during GPS check-in/check-out.
+- Granted attendance history, correction, and exception-approval permissions to Production Manager, Store Manager, Sales Manager, and Managing Director roles.
+- Added dashboard controls for approving off-site attendance and correcting check-in/check-out times with a required reason.
+- Verified the refreshed dashboard shows the manager controls with no attendance API error. Ruff, all 8 API tests, and the frontend production build pass.
+- Registered the current dashboard browser as the Managing Director attendance device during live UI verification.
+- Added a 12-second GPS lookup timeout so browsers that cannot return a location fail cleanly instead of leaving attendance controls busy indefinitely.
+- Reset the temporary attendance test device for `ehteshamazam01@gmail.com` and recorded the reset in the audit log so attendance testing can resume later with the intended browser.
+- Verified the serialized production workflow from opening-inventory support through drone confirmation: drone creation, component requests, partial issue/backorder, serial assignment, installation approval/history, production tasks, and confirmation locking are implemented.
+- Paused the supplier/replenishment module before implementation and removed its incomplete scaffold so the repository remains runnable while the core workflow is being validated.
+- Re-ran the API foundation/workflow suite: all 8 tests pass; only existing dependency/deprecation warnings remain.
+- Added `test_opening_inventory_to_confirmed_drone_workflow`, covering opening inventory entry, partial issue, delayed serial assignment, final issue, installation, task completion, drone confirmation, inventory state, and audit events.
+- Ruff and the complete API suite pass with 9 tests; only the existing dependency/deprecation warnings remain.
+- Fixed the production installation 500 caused by the 32-character inventory location column being too short for `drone:<uuid>` values.
+- Added and applied migration `0009_expand_inventory_location`, expanding inventory locations to 128 characters.
+- Completed the full workflow manually in the dashboard with test records: opening inventory, drone creation, component request, partial issue, delayed serial entry, final issue, installation, task completion, and confirmation lock.
+- Approved the simplified email requirement: one shared GOAG mailbox is accessible only to the Store Manager and Managing Director; all other roles have no email access.
+- Added `MailboxConnection` and migration `0010_shared_mailbox` for one company-scoped shared Gmail connection with connection status, mailbox address, scopes, and encrypted-token storage fields.
+- Added mailbox RBAC permissions: Managing Director can read, send, and manage the mailbox; Store Manager can read and send; all other roles have no mailbox permissions.
+- Added the protected FastAPI `GET /api/v1/email/status` endpoint and the dashboard Shared GOAG mailbox panel with configuration/connection status.
+- Added shared-mailbox environment placeholders to `.env.example` without adding real credentials.
+- Applied migration `0010_shared_mailbox` to the development Supabase database and re-seeded the approved roles/permissions successfully.
+- Verified Ruff, the complete API suite (10 tests), and the Next.js production build pass.
+- Added migration `0011_mailbox_oauth_state` for short-lived, one-time OAuth state hashes and applied it to the development Supabase database.
+- Implemented protected Gmail OAuth start/callback endpoints with state validation, configured-mailbox email matching, limited Gmail read/send scopes, and audit events for start, success, rejection, and failure.
+- Added Fernet encryption for stored Gmail refresh tokens; raw refresh tokens are never persisted.
+- Wired the dashboard connection button to the OAuth start endpoint and added the local dashboard redirect for connection results.
+- Re-ran verification successfully: Ruff, all 11 API tests, and the Next.js production build pass.
+- Corrected the local Gmail token-encryption configuration, restarted FastAPI, refreshed RBAC permissions, and verified the dashboard OAuth button reaches Google’s account chooser. The mailbox owner still needs to select the correct Google account and approve access.
+- Added the protected Gmail send endpoint and dashboard compose/send form with the connection-test subject/body, recipient validation, encrypted-token refresh, Gmail API delivery, and send audit events.
+- Verified the connected mailbox and OAuth token. The first test-send attempt was blocked by Google because the Gmail API is disabled in project `834058534718`; the message was not confirmed as sent.
+- Enabled the Gmail API in the Google Cloud project and successfully sent the authorized connection-test email from `ehteshamazam01@gmail.com` to `abdussamad8886@gmail.com`.
+- Confirmed the successful delivery request through the `email.message_sent` audit event, including the recipient, subject, and connected mailbox address.
+- Added protected Gmail inbox list/search and thread-read endpoints with Gmail query support, metadata parsing, plain-text body extraction, and read audit events.
+- Added the shared-mailbox inbox UI using the shadcn Table and Input components, with refresh, Gmail-filter search, message previews, thread reading, and role-aware compose access.
+- Verified the connected dashboard loads the inbox and displays the sent connection-test message; API linting passes, 12 API tests pass, and the Next.js production build passes.
+- Acceptance-tested the connected Managing Director dashboard: inbox loading, exact-subject search, opening the test thread, and message content all passed.
+- Verified persisted mailbox RBAC assignments: Managing Director has manage/read/send, Store Manager has read/send, and no other approved role has mailbox permissions.
+- Added the first operational dashboard summary API with permission-filtered inventory, request, production, task, own-attendance, and Managing Director audit metrics.
+- Added the shadcn operational dashboard UI with live metric cards, own-attendance status, recent audit activity, and refresh behavior.
+- Updated attendance self-history access so every authenticated GOAG user can view their own attendance; company-wide history and corrections remain manager-controlled.
+- Verified the live dashboard shows inventory, production, task, audit, and own-attendance metrics. Final checks pass: 13 API tests, Ruff, and the Next.js production build.
+- Added idempotent `apps/api/seed_users.py` for six standard development application users and their approved role memberships.
+- Seeded the development database with invited users for Managing Director, Production Manager, Store Manager, Sales Manager, Technician, and After-Sales Manager.
+- Documented the user-seeding command and Supabase Auth linking requirement in `README.md`; no passwords or Supabase Auth identities are stored in the repository.
+- Added secure first-login linking: an invited application user is linked and activated when a verified Supabase Auth identity with the same email makes its first API request; the link is audit logged.
+- Added regression coverage for invited-user linking. Final API verification passes: 14 tests and Ruff lint.
+- Created and browser-tested all six seeded development Auth users with the shared development password: Managing Director, Production Manager, Store Manager, Sales Manager, Technician, and After-Sales Manager.
+- Verified each account reaches the dashboard, is automatically linked to its invited application user, and displays an active membership with the expected RBAC role. Permission counts verified: 24, 10, 14, 5, 5, and 0 respectively.
+- Re-ran the complete API verification after role testing: 14 tests passed and Ruff passed.
+- Read `FRONTEND_REDESIGN_PROMPT.md` and created `FRONTEND_REDESIGN_IMPLEMENTATION_PLAN.md` with the target information architecture, reusable shell/access components, phased module redesign, Sales API gap analysis, role-based acceptance matrix, and responsive/accessibility verification plan.
+- Started Phase 1 of the frontend redesign: added `apps/web/components/app-shell.tsx` with responsive navigation, GOAG branding, top bar, global-search placeholder, human-readable user menu, and role-filtered navigation.
+- Added `apps/web/lib/workspace-config.ts` as the central role-label, permission-to-navigation, and access-map configuration.
+- Refactored `apps/web/app/dashboard/page.tsx` to use the new shell, role-aware greeting, permission-aware operational metrics, and a cleaner authenticated error state while preserving existing workflow panels.
+- Updated `apps/web/app/globals.css` with the warm-neutral background, indigo accent, semantic sidebar colors, borders, and focus-ring foundation from the redesign plan.
+- Verified the new shell in the local browser at the authenticated Managing Director dashboard, including responsive header behavior and live operational data.
+- Frontend production build passes after the Phase 1 changes.
+- Started Phase 2 of the frontend redesign with `apps/web/components/role-overview.tsx` and reusable `metric-card.tsx`, `needs-attention-list.tsx`, `activity-list.tsx`, `quick-actions.tsx`, `empty-state.tsx`, and `loading-skeleton.tsx` components.
+- Replaced the generic operational metric block with role-specific KPI selection, role-aware subtitles, needs-attention items, recent activity, and quick actions.
+- Added intentional Sales Manager coming-soon state documenting the missing Sales API areas: customers, quotations, orders, deliveries, and sold-drone records.
+- Added intentional After-Sales Manager empty state with a personal-attendance action instead of a permission error.
+- Gated the legacy inventory/production workflow at the dashboard boundary so Sales Manager and After-Sales Manager do not trigger its data requests.
+- Browser-verified the Managing Director control tower, Sales Manager coming-soon view, and After-Sales Manager reserved-role view.
+- Frontend production build passes after the Phase 2 changes.
+- Added `apps/web/lib/dashboard-context.ts` as the shared authenticated server context for dashboard routes, including Supabase session lookup and current-user loading.
+- Refactored `/dashboard` into an overview-only control tower so attendance, mailbox, inventory, and production forms are no longer mounted on the overview route.
+- Added focused dashboard routes for `/dashboard/attendance`, `/dashboard/inventory`, `/dashboard/production`, `/dashboard/mailbox`, `/dashboard/sales`, and `/dashboard/team`.
+- Added permission-safe route boundaries for Inventory, Production, Mailbox, Sales, and Team views, including intentional unavailable/coming-soon states for roles without access.
+- Added scoped `WorkflowPanel` loading for Inventory versus Production so each route requests only the data needed by its workspace while preserving the existing serialized workflow actions.
+- Replaced the legacy `Module 2` label with route-specific Inventory, Production, Store operations, and Manufacturing operations copy.
+- Browser-verified the overview, Inventory workspace, and Production workspace with the authenticated Managing Director account. The Next.js production build passes with all new routes generated successfully.
+- Moved the highest-use Inventory and Production actions into focused shadcn/ui dialogs: create drone, request components, issue components, assign missing serials, component traceability, add production task, and confirm completed drone.
+- Added controlled issue and confirmation dialogs so request-review actions can open the correct workflow directly and close after successful completion.
+- Browser-verified the compact Inventory actions, opened and closed the issue dialog, and verified the compact Production actions and tables. The Next.js production build passes.
+- Extracted request rejection/cancellation, installation approval, and confirmed-drone reopening into `apps/web/components/workflow-review-dialogs.tsx`.
+- Replaced direct installation approval with an explicit review-and-approve confirmation dialog and preserved audit-backed success/failure handling.
+- Browser-verified the reopen confirmation dialog and its dismissal without changing production data. The Next.js production build passes.
+- Added `apps/web/components/workflow-types.ts` as the shared type contract for serialized workflow records and form state.
+- Extracted the route-facing workflow UI into `apps/web/components/inventory-module.tsx` and `apps/web/components/production-module.tsx`.
+- Kept API loading, permission evaluation, mutation handlers, and audit behavior in `workflow-panel.tsx` while the new modules own their tables, forms, and dialogs.
+- Browser-verified the extracted Inventory and Production modules with the authenticated Managing Director account. The Next.js production build passes.
+- Removed the unused legacy `scope="all"` fallback and duplicate JSX from `apps/web/components/workflow-panel.tsx`.
+- Narrowed `WorkflowPanel` to the supported `inventory` and `production` scopes, with each route now rendering only its extracted module.
+- Rebuilt successfully and browser-verified both Inventory and Production after the cleanup.
+- Completed the responsive refinement pass for the separated workspaces: bounded mobile navigation and user menus, prevented page-level horizontal overflow, enabled wrapping for dense table actions, and made dialogs scroll within smaller viewports.
+- Rebuilt the Next.js application successfully after the responsive changes.
+- Browser-verified the authenticated Inventory and Production workspaces after the build, including opening inventory, component catalog, request review, installation history, and production task surfaces.
+- Added role-aware administration responses to `GET/POST /api/v1/admin/users`, including assigned role codes and membership status.
+- Replaced the Team placeholder route with `apps/web/components/team-admin-panel.tsx`, including the live member table, role badges, Managing Director invite dialog, Supabase Auth linking guidance, and registered-device reset controls.
+- Added regression coverage for the role data returned when creating an administrative user. Ruff and all 14 API tests pass.
+- Browser-verified the authenticated Team workspace with the seeded GOAG users and opened the invite dialog to confirm all six approved role choices are available.
+- Rebuilt the Next.js application successfully with the Team administration route.
+- Added the `assignment.update_own` permission for Technicians and restricted production task listing/update behavior so Technicians only see and update tasks assigned to them; managers retain full task control.
+- Added role-specific focus panels to Inventory and Production for Store Manager, Technician, and Managing Director/manager workflows.
+- Re-seeded the development Supabase database successfully so the Technician role receives the new permission.
+- Browser-verified the Managing Director Inventory oversight and Production control views after the role-specific changes.
+- Acceptance-tested the Store Manager session: Inventory shows Store control and request review, while Production correctly remains unavailable.
+- Acceptance-tested the Technician session: Inventory shows component handover without opening-inventory controls, and Production shows assigned production work with no unrelated tasks.
+- Fixed scoped workflow loading so Store Manager no longer receives an irrelevant drone permission warning on the Inventory route.
+- Fixed the local Next.js Webpack overlay caused by a stale development server and workspace-root inference. `apps/web/next.config.ts` now anchors `outputFileTracingRoot` to the GOAG repository; the stale server was restarted and the Inventory page compiles cleanly again.
+- Rebuilt the frontend successfully after the Next.js workspace-root fix.
+- Added opt-in `apps/web/tests/workflow-e2e.spec.ts` coverage for opening inventory, drone creation, component request, partial issue, delayed serial assignment, final issue, production task completion, component installation, and drone confirmation.
+- Added `GOAG_E2E_WORKFLOW=0` to `.env.example` so data-writing workflow coverage is disabled during ordinary test runs and must be explicitly enabled.
+- Fixed opening-inventory autosave refresh behavior in `apps/web/components/workflow-panel.tsx`; background refreshes now preserve the saved table row instead of remounting the workflow panel.
+- Ran the opt-in workflow test successfully: 1 test passed in 1.5 minutes and created uniquely prefixed `PW-E2E-*` development records.
+- Final frontend production build passes and Playwright discovers 13 tests across the six-role matrix and serialized workflow coverage.
+- Added Playwright as a root development dependency and configured `playwright.config.ts` to start/reuse the FastAPI and Next.js services for browser tests.
+- Added `apps/web/tests/role-matrix.spec.ts` covering login and approved route/visibility expectations for all six roles: Managing Director, Production Manager, Store Manager, Sales Manager, Technician, and After-Sales Manager.
+- Added environment-based role credentials to `.env.example`, keeping passwords out of source control; the Managing Director uses a separate password variable because that account is the real development account.
+- Fixed Next.js root `.env` loading from `apps/web/next.config.ts`, added Playwright artifact ignores, and made the test helper wait for React hydration before filling controlled login inputs.
+- Installed the Playwright Chromium runtime and verified the final role matrix: 10 tests passed for the five seeded shared-password accounts, 2 Managing Director tests were skipped because `GOAG_TEST_MD_PASSWORD` was not supplied, and no tests failed.
+- Verified the Next.js production build after adding the Playwright coverage.
+- Added API regression coverage for Store Manager-approved component substitutions, request rejection reasons, remaining-quantity cancellation, and the full component lifecycle: install, remove, return, replace, and damage.
+- Fixed the remaining-quantity cancellation dead-end: authorized users can cancel after all production tasks for the drone are completed, the cancellation reason is persisted and audited, and a confirmed drone accepts cancelled requests while still rejecting unresolved pending requests.
+- Updated the Inventory workspace to expose cancellation once all drone production tasks are completed, with updated review-dialog guidance.
+- Final verification for this edge-case layer passes: 18 API tests, Ruff, and the Next.js production build.
+- Re-read `FRONTEND_REDESIGN_PROMPT.md` including the second audit findings and updated `FRONTEND_REDESIGN_IMPLEMENTATION_PLAN.md` with the remaining P0/P1 work, exact implementation order, API display-data gaps, test-data isolation strategy, and release gate.
+- Added an explicit execution-start notice to `FRONTEND_REDESIGN_IMPLEMENTATION_PLAN.md`, split the release gate into mandatory local and environment-dependent checks, and clarified that skipped environment checks make the release unverified.
+- Added the root `typecheck` script to `package.json` and fixed the existing Playwright workflow helper typing issue exposed by the new check.
+- Started the redesign reliability phase: added `apps/web/components/error-state.tsx`, an 8-second overview request timeout, stale-data preservation during refresh failures, and 10-second FastAPI proxy timeout handling with 502/504 responses.
+- Verified the first reliability slice with `pnpm typecheck` and a successful Next.js production build.
+- Added opt-in deterministic Playwright coverage in `apps/web/tests/failure-state.spec.ts` for controlled 503 retry recovery and delayed summary responses exceeding the client timeout.
+- Verified both failure-state tests pass in 23.5 seconds with `GOAG_E2E_FAILURES=1`; the tests are read-only and do not create workflow data.
+- Replaced the inert AppShell refresh button with `apps/web/components/workspace-controls.tsx`, which broadcasts a client-side refresh event consumed by Overview, Inventory/Production, Attendance, Mailbox, and Team panels.
+- Replaced the misleading active global-search input with an accessible disabled `Search coming soon` control and documented the V1 search decision until a permission-safe search projection is available.
+- Verified the refresh/search changes with `pnpm typecheck` and a successful Next.js production build.
+- Strengthened `apps/web/tests/role-matrix.spec.ts` with explicit forbidden API request tracking for restricted workspaces, including Sales Manager and After-Sales Manager.
+- Added fail-fast behavior through `GOAG_RUN_ROLE_MATRIX=1`; required role credentials are no longer silently treated as a complete matrix when missing.
+- Added `GOAG_RUN_ROLE_MATRIX=0` to `.env.example` and verified the role suite discovers all 12 tests with `pnpm exec playwright test ... --list`.
+- Diagnosed and recovered the local development services: FastAPI was stopped and a stale, non-responsive Node process occupied port 3000; the exact stale process was stopped and both services were restarted.
+- Fixed a role-matrix timing sensitivity by allowing up to 15 seconds for route content during first-load compilation.
+- Completed the authenticated role matrix for the five seeded shared-password accounts: 10 tests passed, including forbidden API request assertions for restricted roles; the two Managing Director checks remain skipped until `GOAG_TEST_MD_PASSWORD` is supplied.
+- Re-verified the updated role-matrix code with `pnpm typecheck`.
+- Completed the route-hierarchy cleanup for Inventory and Production: the route-level headers are now the single source for module title, purpose, and page context; duplicate inner module headers and refresh buttons were removed.
+- Preserved workspace refresh through the shared top-bar refresh event so the focused routes still refresh without duplicate controls.
+- Verified the hierarchy cleanup with `pnpm typecheck`, a successful Next.js production build, and a source check confirming only the route-level Inventory/Production headers remain.
+- Added `DEPLOYMENT_GUIDE.md` with the staging-first deployment plan for Supabase, Render FastAPI, the optional worker, Next.js hosting, environment variables, migrations, OAuth/CORS configuration, smoke tests, production release gates, and rollback guidance.
+- Documented that the current API Dockerfile requires an explicit Render Docker command because it does not yet define a production `CMD`; the worker remains optional until asynchronous jobs are implemented.
+- Added additive readable dashboard audit projections: action labels, subjects, and status labels now accompany the legacy audit fields.
+- Added readable API projections for component requests, installation history, production tasks, and attendance records, including component codes, drone serials, component serials, employee names, and assignee names.
+- Removed raw UUID fragments from primary Team, Attendance, Inventory, and Production views; pending human identifiers now use explicit labels such as “Drone serial pending” and “Serial number is pending.”
+- Added regression assertions for dashboard audit projections and component-request display fields.
+- Verified the display-data slice with 18 API tests, Ruff, `pnpm typecheck`, `git diff --check`, and a successful Next.js production build.
+- Replaced the functional placeholder at `apps/web/app/login/page.tsx` with a professional responsive GOAG sign-in experience: two-panel desktop layout, mobile branding, workspace messaging, feature highlights, shadcn/ui controls, password visibility toggle, accessible error states, and loading states.
+- Preserved the existing Supabase email/password and Google OAuth flows, including the secure `/auth/callback?next=/dashboard` redirect.
+- Verified the redesigned login page in the local browser and passed the Next.js production build and `pnpm typecheck`.
+
+## 🚧 Work in Progress
+
+- Core serialized workflow validation is complete in both the API test suite and the dashboard, including substitutions, rejection/cancellation, and component lifecycle traceability. The frontend redesign is now in the reliability hardening phase: the shell, role-specific routes, module separation, Team administration, role matrix, timeout/error states, refresh behavior, readable display projections, forbidden-request assertions, route hierarchy cleanup, URL-backed operational filters, real proxy-timeout integration, and the professional login entry screen exist. Deployment planning is documented, but staging infrastructure is not configured yet; final GOAG review of role-specific priorities remains. Attendance testing remains paused.
+
+## ⏳ Next Steps / Pending Tasks
+
+- Configure and verify Supabase Auth password login and Google OAuth provider settings.
+- Verify the dummy Managing Director can sign in through the Next.js password login screen, test Google login, and sign out.
+- Add PostgreSQL integration coverage for rejection, substitutions, returns, replacements, and reopen/audit behavior.
+- Run the opt-in Playwright edge-case workflow against the live development services after the next UI review, using a dedicated test account/data prefix.
+- Implement the redesign hardening plan starting with timeout/error handling, honest refresh/search controls, accurate metric scope, and removal of UUIDs from primary views.
+- Review the refreshed login branding, copy, and Google/email sign-in experience with GOAG before deployment.
+- Create the staging Supabase project and Render FastAPI service, then configure the environment variables from `DEPLOYMENT_GUIDE.md`.
+- Collect GOAG feedback on the reviewed Store Manager and Production Manager priority queues, then make only approved terminology/order refinements.
+- Enter GOAG’s existing opening inventory and serial numbers through the spreadsheet interface before operational testing.
+- Replace the dashboard test records with GOAG’s real opening inventory and serial numbers when supplied.
+- Add mailbox pagination and optional unread/read-state actions after GOAG reviews the first inbox UI.
+- Add dashboard drill-down links and date filters after GOAG reviews the first operational view.
+- Supply `GOAG_TEST_MD_PASSWORD` locally and rerun `GOAG_TEST_PASSWORD=123456 pnpm test:e2e` to execute the Managing Director pair as well; the six-role test definitions are already in place.
+- Add global search/date filters and dashboard drill-down behavior after GOAG reviews the separated workspaces.
+- Replace the shared development password with strong per-user passwords before any non-local deployment.
+- Add audit logging for mailbox connection, message sends, and mailbox administration.
+- Add the mailbox inbox/compose UI for only Store Manager and Managing Director.
+- Add PostgreSQL integration coverage and Playwright coverage for catalog, opening inventory, and the complete serialized production workflow.
+- Complete device registration/reset behavior and connect Managing Director invitations to Supabase Auth users.
+- Expand Playwright with mutation-level coverage for substitutions, rejection/cancellation, component replacement/return/damage, attendance exceptions, and mailbox permissions.
+- Run a real-device attendance test at the configured GOAG test coordinates and confirm the 150-meter radius with GOAG during pilot review.
+
+## 🛑 Blockers & Open Decisions
+
+- Google OAuth client credentials and Supabase redirect URLs still need to be configured before Google login can be used.
+- The Google Workspace/Gmail account that should act as the shared mailbox must be selected during the browser OAuth flow; `GOAG_GMAIL_MAILBOX_ADDRESS` is optional and can remain blank.
+- Gmail OAuth client credentials and the redirect URI are not configured yet, so the dashboard currently reports the mailbox as not connected.
+- Gmail API is enabled and the authorized connection-test send has succeeded; mailbox reading/search remains to be implemented.
+- Render is the proposed FastAPI hosting provider, but the staging service, frontend hosting, and production domains have not been configured yet.
+- The configured coordinates are currently test coordinates; GOAG should confirm the final office coordinates and radius during pilot review.
+- Existing inventory and historical records will be entered manually by GOAG; the exact catalog and opening quantities are still pending.
+- Development role accounts are currently using the shared password `123456`; this is acceptable only for local testing and must be rotated before deployment.
+- The Managing Director Playwright checks are skipped unless the real development account password is supplied through `GOAG_TEST_MD_PASSWORD`; no MD password is stored in the repository.
+- The workflow Playwright test is intentionally data-writing and disabled by default; run it only against the development database with `GOAG_E2E_WORKFLOW=1`.
+- Final UI details, terminology review, and pilot acceptance dates remain to be agreed.
+- The current API test suite uses an isolated SQLite test database; PostgreSQL integration execution remains pending until Docker or a Supabase database is available.
+- Docker was not available to run local PostgreSQL; the initial migration and seed were applied successfully to the configured Supabase PostgreSQL database.
