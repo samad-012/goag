@@ -36,7 +36,7 @@ def create_user(
     for code in payload.role_codes:
         role = db.scalar(select(Role).where(Role.company_id == membership.company_id, Role.code == code))
         if not role:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Unknown role: {code}")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=f"Unknown role: {code}")
         db.add(MembershipRole(membership_id=new_membership.id, role_id=role.id))
     record_audit(
         db,

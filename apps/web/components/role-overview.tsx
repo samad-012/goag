@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { ArrowRight, RefreshCw } from "lucide-react";
 import type { CurrentUserResponse } from "@/lib/api-client";
 import { roleLabel } from "@/lib/workspace-config";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ActivityList } from "@/components/activity-list";

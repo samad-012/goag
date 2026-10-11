@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { InstallationApprovalDialog, ReopenDroneDialog, type ReopenState } from "@/components/workflow-review-dialogs";
-import type { ActionForm, Assignee, Component, ComponentRequest, Drone, DroneForm, DroneModel, InventoryUnit, ProductionTask, RequestForm } from "@/components/workflow-types";
+import type { ActionForm, Assignee, Component, Drone, DroneForm, DroneModel, InventoryUnit, ProductionTask, RequestForm } from "@/components/workflow-types";
 import { confirmationChecks, type ConfirmationCheck } from "@/components/workflow-types";
 
 const fieldClassName = "h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring";

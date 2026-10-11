@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { RotateCcw, UserPlus, UsersRound } from "lucide-react";
 import { roleLabel } from "@/lib/workspace-config";
 import { Badge } from "@/components/ui/badge";
@@ -55,7 +55,7 @@ export function TeamAdminPanel({ permissions }: { permissions: string[] }) {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ email: "", display_name: "", role_code: "TECHNICIAN" });
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     if (!canRead) return;
     setLoading(true);
     setError("");
@@ -66,14 +66,14 @@ export function TeamAdminPanel({ permissions }: { permissions: string[] }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [canRead]);
 
   useEffect(() => {
     void loadUsers();
     const refresh = () => void loadUsers();
     window.addEventListener(WORKSPACE_REFRESH_EVENT, refresh);
     return () => window.removeEventListener(WORKSPACE_REFRESH_EVENT, refresh);
-  }, [canRead]);
+  }, [canRead, loadUsers]);
 
   const createUser = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

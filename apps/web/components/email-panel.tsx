@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -93,7 +93,7 @@ export function EmailPanel({ permissions }: { permissions: string[] }) {
       );
   }, [canRead]);
 
-  async function loadMessages(query = activeQuery) {
+  const loadMessages = useCallback(async (query = activeQuery) => {
     setLoadingMessages(true);
     setInboxError("");
     try {
@@ -107,7 +107,7 @@ export function EmailPanel({ permissions }: { permissions: string[] }) {
     } finally {
       setLoadingMessages(false);
     }
-  }
+  }, [activeQuery]);
 
   useEffect(() => {
     if (!status?.connected) return;
@@ -115,7 +115,7 @@ export function EmailPanel({ permissions }: { permissions: string[] }) {
     // The connected state is the only trigger needed for the initial inbox load.
     // Search and refresh call loadMessages directly.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status?.connected]);
+  }, [loadMessages, status?.connected]);
 
   useEffect(() => {
     const refresh = () => {
@@ -127,7 +127,7 @@ export function EmailPanel({ permissions }: { permissions: string[] }) {
     };
     window.addEventListener(WORKSPACE_REFRESH_EVENT, refresh);
     return () => window.removeEventListener(WORKSPACE_REFRESH_EVENT, refresh);
-  }, [canRead, status?.connected]);
+  }, [canRead, loadMessages, status?.connected]);
 
   async function openThread(threadId: string | null) {
     if (!threadId) return;

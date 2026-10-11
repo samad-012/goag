@@ -263,7 +263,7 @@ def create_production_task(
             )
         )
         if not assignee:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Assigned user must be an active technician")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Assigned user must be an active technician")
     task = ProductionTask(
         company_id=membership.company_id,
         drone_id=drone.id,
@@ -323,7 +323,7 @@ def _validate_issue_line(db: Session, issue_line_id: UUID | None, drone: Drone, 
         )
     )
     if not issue_line:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Issue line does not belong to this drone")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Issue line does not belong to this drone")
 
 
 @router.post("/drones/{drone_id}/components", response_model=ComponentInstallationResponse, status_code=status.HTTP_201_CREATED)
@@ -359,7 +359,7 @@ def component_action(
     if not unit:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Inventory unit not found")
     if payload.action in {"install", "replace"} and not unit.serial_number:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Component serial number is required before installation")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Component serial number is required before installation")
     _validate_issue_line(db, payload.issue_line_id, drone, unit.id)
 
     replacement_for_id = payload.replacement_for_id
@@ -383,7 +383,7 @@ def component_action(
         unit.location = "store"
     elif payload.action == "replace":
         if not replacement_for_id:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="replacement_for_id is required")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="replacement_for_id is required")
         old_installation = db.scalar(
             select(ComponentInstallation).where(
                 ComponentInstallation.id == replacement_for_id,
@@ -511,19 +511,19 @@ def confirm_drone(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Drone is already confirmed")
     missing_checks = sorted(key for key in REQUIRED_CONFIRMATION_CHECKLIST if payload.checklist.get(key) is not True)
     if missing_checks:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Checklist items are incomplete: {', '.join(missing_checks)}")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=f"Checklist items are incomplete: {', '.join(missing_checks)}")
     if not drone.serial_number:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Drone serial number is required")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Drone serial number is required")
 
     requests = db.scalars(select(ComponentRequest).where(ComponentRequest.drone_id == drone.id)).all()
     if any(request.status not in {"fulfilled", "cancelled"} for request in requests):
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="All component requests must be fulfilled or cancelled before confirmation")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="All component requests must be fulfilled or cancelled before confirmation")
     request_items = db.scalars(
         select(ComponentRequestItem).where(ComponentRequestItem.request_id.in_([request.id for request in requests]))
     ).all() if requests else []
     cancelled_request_ids = {request.id for request in requests if request.status == "cancelled"}
     if any(item.pending_quantity != 0 and item.request_id not in cancelled_request_ids for item in request_items):
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Pending component quantities remain")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Pending component quantities remain")
 
     issue_lines = db.scalars(
         select(ComponentIssueLine)
@@ -532,11 +532,11 @@ def confirm_drone(
         .where(ComponentRequest.drone_id == drone.id)
     ).all()
     if any(line.inventory_unit_id is None for line in issue_lines):
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Every issued component must have an inventory unit")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Every issued component must have an inventory unit")
     unit_ids = [line.inventory_unit_id for line in issue_lines if line.inventory_unit_id]
     units = db.scalars(select(InventoryUnit).where(InventoryUnit.id.in_(unit_ids))).all() if unit_ids else []
     if any(not unit.serial_number or unit.status != "installed" for unit in units):
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Every installed component needs a serial number")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Every installed component needs a serial number")
     installations = db.scalars(
         select(ComponentInstallation).where(ComponentInstallation.drone_id == drone.id).order_by(ComponentInstallation.occurred_at, ComponentInstallation.id)
     ).all()
@@ -544,7 +544,7 @@ def confirm_drone(
     for installation in installations:
         latest[installation.inventory_unit_id] = installation
     if any(latest.get(unit_id) is None or latest[unit_id].action not in {"install", "replace"} or latest[unit_id].approved_by_membership_id is None for unit_id in unit_ids):
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Every component installation must be approved")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Every component installation must be approved")
 
     from datetime import UTC, datetime
 

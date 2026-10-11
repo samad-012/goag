@@ -220,7 +220,7 @@ def create_component_request(
 
     component_ids = [item.component_id for item in payload.items]
     if len(set(component_ids)) != len(component_ids):
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Each component may appear once per request")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Each component may appear once per request")
     components = db.scalars(
         select(ComponentCatalog).where(
             ComponentCatalog.company_id == membership.company_id,
@@ -229,7 +229,7 @@ def create_component_request(
         )
     ).all()
     if len(components) != len(component_ids):
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="One or more components were not found")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="One or more components were not found")
 
     request = ComponentRequest(
         company_id=membership.company_id,
@@ -298,7 +298,7 @@ def issue_components(
 
     item_ids = [line.request_item_id for line in payload.lines]
     if len(set(item_ids)) != len(item_ids):
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Each request item may be issued once per transaction")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Each request item may be issued once per transaction")
     items = db.scalars(
         select(ComponentRequestItem).where(
             ComponentRequestItem.request_id == request.id,
@@ -324,7 +324,7 @@ def issue_components(
     for line in payload.lines:
         item = item_map[line.request_item_id]
         if line.quantity > item.pending_quantity:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Issue quantity exceeds pending quantity")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Issue quantity exceeds pending quantity")
         if line.substituted_component_id:
             if not has_permission(membership, db, "inventory.substitute"):
                 raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Substitution approval is required")
@@ -342,18 +342,18 @@ def issue_components(
             expected_component_id = item.component_id
 
         if line.inventory_unit_ids and len(line.inventory_unit_ids) != line.quantity:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="One inventory unit is required per issued serialized quantity")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="One inventory unit is required per issued serialized quantity")
         if len(set(line.inventory_unit_ids)) != len(line.inventory_unit_ids):
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Inventory units cannot repeat")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Inventory units cannot repeat")
         if line.inventory_unit_ids and line.serial_numbers:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Provide inventory units or serial numbers, not both")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Provide inventory units or serial numbers, not both")
         if line.serial_numbers and len(line.serial_numbers) != line.quantity:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="One serial number is required per issued serialized quantity")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="One serial number is required per issued serialized quantity")
         serial_numbers = [serial.strip() for serial in line.serial_numbers]
         if any(not serial for serial in serial_numbers):
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Serial numbers cannot be empty")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Serial numbers cannot be empty")
         if len(set(serial_numbers)) != len(serial_numbers):
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Serial numbers cannot repeat")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Serial numbers cannot repeat")
 
         units = []
         if line.inventory_unit_ids:

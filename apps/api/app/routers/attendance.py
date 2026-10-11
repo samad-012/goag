@@ -62,9 +62,9 @@ def _validated_location(
 ) -> tuple[float, float, float]:
     settings = get_settings()
     if payload.gps_denied or payload.latitude is None or payload.longitude is None or payload.accuracy_m is None:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="GPS location is required")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="GPS location is required")
     if payload.accuracy_m > settings.goag_max_gps_accuracy_m:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="GPS accuracy is too poor")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="GPS accuracy is too poor")
     distance = distance_in_metres(
         payload.latitude,
         payload.longitude,
@@ -79,7 +79,7 @@ def _validated_location(
             AttendanceException.status == "approved",
         )
     ):
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Outside approved GOAG geofence")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Outside approved GOAG geofence")
     return payload.latitude, payload.longitude, distance
 
 
@@ -324,7 +324,7 @@ def correct_attendance(
     if payload.check_out_at:
         attendance.check_out_at = payload.check_out_at
     if attendance.check_out_at and attendance.check_out_at < attendance.check_in_at:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Checkout must be after check-in")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Checkout must be after check-in")
     attendance.corrected_by_membership_id = membership.id
     attendance.correction_reason = payload.reason
     record_audit(
