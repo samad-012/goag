@@ -13,6 +13,8 @@ This repository contains the GOAG V1 technical foundation.
 
 ## Local setup
 
+For a complete fresh-clone walkthrough, see [SETUP_INSTRUCTIONS.md](SETUP_INSTRUCTIONS.md).
+
 1. Copy `.env.example` to `.env` and provide Supabase development values.
 2. Start PostgreSQL: `docker compose up postgres -d`.
 3. Install API dependencies: `cd apps/api && uv sync --extra dev`.
