@@ -7,10 +7,10 @@ const email = process.env.GOAG_TEST_STORE_MANAGER_EMAIL || "store.manager@goag.e
 async function signIn(page: Page) {
   await page.goto("/login");
   await page.getByLabel("Work email").fill(email);
-  await page.getByLabel("Password").fill(password);
+  await page.getByRole("textbox", { name: "Password" }).fill(password);
   await expect(page.getByLabel("Work email")).toHaveValue(email);
-  await expect(page.getByLabel("Password")).toHaveValue(password);
-  await page.getByRole("button", { name: "Sign in with password" }).click();
+  await expect(page.getByRole("textbox", { name: "Password" })).toHaveValue(password);
+  await page.getByRole("button", { name: "Sign in to workspace" }).click();
   await expect(page).toHaveURL(/\/dashboard(?:$|\/)/, { timeout: 30_000 });
 }
 

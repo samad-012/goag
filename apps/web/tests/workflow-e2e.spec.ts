@@ -11,8 +11,8 @@ const productionEmail = process.env.GOAG_TEST_PRODUCTION_MANAGER_EMAIL || "produ
 async function signIn(page: Page, email: string) {
   await page.goto("/login");
   await page.getByLabel("Work email").fill(email);
-  await page.getByLabel("Password").fill(sharedPassword);
-  await page.getByRole("button", { name: "Sign in with password" }).click();
+  await page.getByRole("textbox", { name: "Password" }).fill(sharedPassword);
+  await page.getByRole("button", { name: "Sign in to workspace" }).click();
   await expect(page).toHaveURL(/\/dashboard(?:$|\/)/, { timeout: 30_000 });
 }
 

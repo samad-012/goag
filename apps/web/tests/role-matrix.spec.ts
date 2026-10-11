@@ -16,7 +16,7 @@ const runRequiredRoleMatrix = process.env.GOAG_RUN_ROLE_MATRIX === "1";
 const roleCases: RoleCase[] = [
   {
     key: "managing-director",
-    email: process.env.GOAG_TEST_MD_EMAIL || "ehteshamazam01@gmail.com",
+    email: process.env.GOAG_TEST_MD_EMAIL || "md@goag.example",
     password: process.env.GOAG_TEST_MD_PASSWORD || "",
     displayName: "Managing Director",
     dashboardText: "Company-wide visibility across people, inventory, and production.",
@@ -138,10 +138,10 @@ test.describe("GOAG seeded role matrix", () => {
     // Filling during the initial commit can be overwritten by React hydration.
     await page.goto("/login");
     await page.getByLabel("Work email").fill(role.email);
-    await page.getByLabel("Password").fill(role.password);
+    await page.getByRole("textbox", { name: "Password" }).fill(role.password);
     await expect(page.getByLabel("Work email")).toHaveValue(role.email);
-    await expect(page.getByLabel("Password")).toHaveValue(role.password);
-    await page.getByRole("button", { name: "Sign in with password" }).click();
+    await expect(page.getByRole("textbox", { name: "Password" })).toHaveValue(role.password);
+    await page.getByRole("button", { name: "Sign in to workspace" }).click();
     await expect(page).toHaveURL(/\/dashboard(?:$|\/)/, { timeout: 30_000 });
     await expect(page.getByText(role.displayName, { exact: true }).first()).toBeVisible();
   }
